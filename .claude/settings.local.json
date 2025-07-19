@@ -20,7 +20,11 @@
       "WebFetch(domain:touchpoints-q574w7jdt-ourania-ka-llc.vercel.app)",
       "Bash(curl:*)",
       "WebFetch(domain:touchpoints-five.vercel.app)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git remote add:*)",
+      "Bash(git remote:*)"
     ],
     "deny": []
   }

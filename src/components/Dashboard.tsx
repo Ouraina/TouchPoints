@@ -10,6 +10,7 @@ import { InstallPrompt } from './pwa/InstallPrompt'
 import { NotificationBell, NotificationCenter } from './notifications/NotificationCenter'
 import { Logo } from './brand/Logo'
 import { WelcomeMessage } from './WelcomeMessage'
+import { BottomNavigation, BottomNavPadding } from './navigation/BottomNavigation'
 import { Plus, Users, Calendar, LogOut } from 'lucide-react'
 
 export const Dashboard: React.FC = () => {
@@ -87,36 +88,28 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--background)' }}>
-      {/* Header */}
-      <div style={{ backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Logo size="md" showText={true} />
-              <div>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there'}
-                </p>
+      <BottomNavPadding>
+        {/* Simplified Header */}
+        <div style={{ backgroundColor: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Logo size="md" showText={true} />
+                <div>
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there'}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <NotificationBell onClick={() => setShowNotifications(true)} />
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleSignOut}
-                className="flex items-center"
-              >
-                <LogOut className="w-4 h-4 mr-1" />
-                Sign Out
-              </Button>
+              <div className="flex items-center space-x-2">
+                <NotificationBell onClick={() => setShowNotifications(true)} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto px-4 py-6">
         {/* PWA Install Prompt */}
         <div className="mb-6">
           <InstallPrompt />
@@ -201,7 +194,11 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </BottomNavPadding>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation />
 
       {/* Notification Center */}
       <NotificationCenter

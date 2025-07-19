@@ -41,7 +41,9 @@ export const LoginScreen: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-primary/80 to-secondary flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ 
+      background: `linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)` 
+    }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Logo size="lg" className="mx-auto mb-4" />

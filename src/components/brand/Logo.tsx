@@ -18,6 +18,8 @@ export const Logo: React.FC<LogoProps> = ({
     xl: 'w-16 h-16'
   };
 
+  const maxWidth = size === 'xl' ? 'max-w-[120px]' : size === 'lg' ? 'max-w-[100px]' : size === 'md' ? 'max-w-[80px]' : 'max-w-[60px]';
+
   const textSizeClasses = {
     sm: 'text-lg',
     md: 'text-xl',
@@ -26,7 +28,7 @@ export const Logo: React.FC<LogoProps> = ({
   };
 
   return (
-    <div className={`flex items-center space-x-3 ${className}`}>
+    <div className={`flex items-center space-x-3 ${maxWidth} ${className}`}>
       {/* Logo Icon - Two overlapping circles representing connection */}
       <div className={`relative ${sizeClasses[size]} flex-shrink-0`}>
         <svg

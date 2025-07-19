@@ -5,6 +5,7 @@ import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Card } from '../ui/Card'
 import { CheckCircle, Mail } from 'lucide-react'
+import { Logo } from '../brand/Logo'
 
 export const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -48,11 +49,14 @@ export const SignUpScreen: React.FC = () => {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ 
+        backgroundColor: 'var(--background)' 
+      }}>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-primary mb-2">TouchPoints</h1>
-            <p className="text-textSecondary">Coordinating family visits with care</p>
+            <Logo size="lg" className="mx-auto mb-4" />
+            <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>TouchPoints</h1>
+            <p style={{ color: 'var(--text-secondary)' }}>Coordinating family visits with care</p>
           </div>
 
           <Card>
@@ -103,11 +107,14 @@ export const SignUpScreen: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ 
+      background: `linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)` 
+    }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">TouchPoints</h1>
-          <p className="text-textSecondary">Coordinating family visits with care</p>
+          <Logo size="lg" className="mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-white mb-2">TouchPoints</h1>
+          <p className="text-white/80">Coordinating family visits with care</p>
         </div>
 
         <Card>
