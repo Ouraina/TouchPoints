@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(cp:*)",
+      "Bash(robocopy:*)",
+      "Bash(xcopy:*)",
+      "Bash(dir)",
+      "Bash(powershell:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx supabase migration:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "Bash(npm uninstall:*)"
+    ],
+    "deny": []
+  }
+}

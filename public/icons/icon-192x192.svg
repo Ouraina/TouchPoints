@@ -1,0 +1,19 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="192" height="192" rx="24" fill="#F7F4F1"/>
+  
+  <!-- Primary circle -->
+  <circle cx="72" cy="96" r="48" fill="#4A90E2" opacity="0.9"/>
+  
+  <!-- Secondary circle -->
+  <circle cx="120" cy="96" r="48" fill="#5FCFC7" opacity="0.9"/>
+  
+  <!-- Intersection highlight -->
+  <circle cx="96" cy="96" r="24" fill="white" opacity="0.3"/>
+  
+  <!-- Central connection point -->
+  <circle cx="96" cy="96" r="6" fill="white"/>
+  
+  <!-- TouchPoints text -->
+  <text x="96" y="150" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#2C3E50">TouchPoints</text>
+</svg>
