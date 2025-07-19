@@ -9,6 +9,7 @@ import { CalendarConnectButton } from './calendar/CalendarConnectButton'
 import { InstallPrompt } from './pwa/InstallPrompt'
 import { NotificationBell, NotificationCenter } from './notifications/NotificationCenter'
 import { Logo } from './brand/Logo'
+import { WelcomeMessage } from './WelcomeMessage'
 import { Plus, Users, Calendar, LogOut } from 'lucide-react'
 
 export const Dashboard: React.FC = () => {
@@ -127,22 +128,25 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {circles.length === 0 ? (
-          /* Empty State */
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8 text-primary" />
+          /* Empty State with Welcome Message */
+          <div>
+            <WelcomeMessage userName={user?.user_metadata?.full_name || user?.email?.split('@')[0]} />
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold text-text mb-2">Ready to Get Started?</h2>
+              <p className="text-textSecondary mb-6 max-w-md mx-auto">
+                Create your first care circle to start coordinating visits with family and friends.
+              </p>
+              <Button
+                onClick={() => navigate('/onboarding/create-circle')}
+                className="flex items-center mx-auto"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Your First Care Circle
+              </Button>
             </div>
-            <h2 className="text-xl font-semibold text-text mb-2">No Care Circles Yet</h2>
-            <p className="text-textSecondary mb-6 max-w-md mx-auto">
-              Create your first care circle to start coordinating visits with family and friends.
-            </p>
-            <Button
-              onClick={() => navigate('/onboarding/create-circle')}
-              className="flex items-center mx-auto"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Care Circle
-            </Button>
           </div>
         ) : (
           /* Care Circles List */

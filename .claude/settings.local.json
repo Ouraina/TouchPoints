@@ -14,7 +14,13 @@
       "Bash(npx supabase migration:*)",
       "Bash(npm run type-check:*)",
       "Bash(npm run:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(vercel:*)",
+      "Bash(supabase:*)",
+      "WebFetch(domain:touchpoints-q574w7jdt-ourania-ka-llc.vercel.app)",
+      "Bash(curl:*)",
+      "WebFetch(domain:touchpoints-five.vercel.app)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

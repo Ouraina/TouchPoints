@@ -19,14 +19,21 @@ export const LoginScreen: React.FC = () => {
     setError('')
     setLoading(true)
 
+    console.log('[LoginScreen] Attempting sign in with:', { email, password: '***' })
+
     try {
-      const { error } = await signIn(email, password)
+      const { data, error } = await signIn(email, password)
+      console.log('[LoginScreen] Sign in response:', { data: !!data, error })
+      
       if (error) {
+        console.error('[LoginScreen] Sign in error:', error)
         setError(error.message)
       } else {
+        console.log('[LoginScreen] Sign in successful, navigating to dashboard')
         navigate('/dashboard')
       }
     } catch (err) {
+      console.error('[LoginScreen] Unexpected error:', err)
       setError('An unexpected error occurred')
     } finally {
       setLoading(false)
@@ -51,6 +58,11 @@ export const LoginScreen: React.FC = () => {
             {error && (
               <div className="p-3 rounded-lg bg-red-50 border border-red-200">
                 <p className="text-sm text-red-600">{error}</p>
+                {error.includes('Auth session or user missing') && (
+                  <p className="text-xs text-red-500 mt-1">
+                    This usually means the account doesn't exist. Try creating a new account first.
+                  </p>
+                )}
               </div>
             )}
 
