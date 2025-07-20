@@ -1,0 +1,56 @@
+import React, { useState, useEffect } from 'react'
+import { X, Calendar, Clock, Users, MessageSquare, Trash2 } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
+
+interface EditVisitModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSuccess: () => void
+  visitId: string
+}
+
+interface Visit {
+  id: string
+  visit_date: string
+  start_time: string
+  end_time: string
+  notes?: string
+  visitor_id: string
+  circle_id: string
+}
+
+interface CareCircle {
+  id: string
+  patient_first_name: string
+  patient_last_name: string
+}
+
+interface FamilyMember {
+  id: string
+  full_name: string
+  email: string
+}
+
+export const EditVisitModal: React.FC<EditVisitModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSuccess, 
+  visitId 
+}) => {
+  const [loading, setLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [visit, setVisit] = useState<Visit | null>(null)
+  const [careCircles, setCareCircles] = useState<CareCircle[]>([])
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([])
+  
+  // Form state
+  const [selectedCircle, setSelectedCircle] = useState('')
+  const [visitDate, setVisitDate] = useState('')
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
+  const [visitorId, setVisitorId] = useState('')
+  const [notes, setNotes] = useState('')
+
+  useEffect(() => {
+    if (isOpen && visitId) {
+      loadVisit()\n      loadData()\n    }\n  }, [isOpen, visitId])\n\n  const loadVisit = async () => {\n    try {\n      const { data, error } = await supabase\n        .from('visits')\n        .select('*')\n        .eq('id', visitId)\n        .single()\n\n      if (error) throw error\n\n      setVisit(data)\n      setSelectedCircle(data.circle_id)\n      setVisitDate(data.visit_date)\n      setStartTime(data.start_time)\n      setEndTime(data.end_time)\n      setVisitorId(data.visitor_id)\n      setNotes(data.notes || '')\n    } catch (error) {\n      console.error('Error loading visit:', error)\n    }\n  }\n\n  const loadData = async () => {\n    try {\n      // Load care circles\n      const { data: circleData, error: circleError } = await supabase\n        .from('care_circles')\n        .select('id, patient_first_name, patient_last_name')\n\n      if (circleError) throw circleError\n      setCareCircles(circleData || [])\n\n      // Load family members for the current circle\n      if (visit?.circle_id) {\n        await loadFamilyMembers(visit.circle_id)\n      }\n    } catch (error) {\n      console.error('Error loading data:', error)\n    }\n  }\n\n  const loadFamilyMembers = async (circleId: string) => {\n    try {\n      const { data, error } = await supabase\n        .from('circle_members')\n        .select(`\n          user_id,\n          users!inner(\n            id,\n            full_name,\n            email\n          )\n        `)\n        .eq('circle_id', circleId)\n\n      if (error) throw error\n\n      const members = data.map(item => item.users)\n      setFamilyMembers(members)\n    } catch (error) {\n      console.error('Error loading family members:', error)\n    }\n  }\n\n  const handleCircleChange = (circleId: string) => {\n    setSelectedCircle(circleId)\n    loadFamilyMembers(circleId)\n  }\n\n  const handleSubmit = async (e: React.FormEvent) => {\n    e.preventDefault()\n    setLoading(true)\n\n    try {\n      const { error } = await supabase\n        .from('visits')\n        .update({\n          circle_id: selectedCircle,\n          visitor_id: visitorId,\n          visit_date: visitDate,\n          start_time: startTime,\n          end_time: endTime,\n          notes: notes || null\n        })\n        .eq('id', visitId)\n\n      if (error) throw error\n\n      onSuccess()\n      onClose()\n    } catch (error) {\n      console.error('Error updating visit:', error)\n      alert('Failed to update visit. Please try again.')\n    } finally {\n      setLoading(false)\n    }\n  }\n\n  const handleDelete = async () => {\n    if (!confirm('Are you sure you want to delete this visit?')) {\n      return\n    }\n\n    setDeleteLoading(true)\n\n    try {\n      const { error } = await supabase\n        .from('visits')\n        .delete()\n        .eq('id', visitId)\n\n      if (error) throw error\n\n      onSuccess()\n      onClose()\n    } catch (error) {\n      console.error('Error deleting visit:', error)\n      alert('Failed to delete visit. Please try again.')\n    } finally {\n      setDeleteLoading(false)\n    }\n  }\n\n  const generateTimeSlots = () => {\n    const slots = []\n    for (let hour = 8; hour <= 20; hour++) {\n      for (let minute = 0; minute < 60; minute += 30) {\n        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`\n        slots.push(time)\n      }\n    }\n    return slots\n  }\n\n  if (!isOpen || !visit) return null\n\n  return (\n    <div className=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4\">\n      <div className=\"bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto\">\n        {/* Header */}\n        <div className=\"flex items-center justify-between p-6 border-b border-gray-200\">\n          <h2 className=\"text-xl font-semibold text-gray-900\">Edit Visit</h2>\n          <button\n            onClick={onClose}\n            className=\"p-2 hover:bg-gray-100 rounded-full transition-colors\"\n          >\n            <X className=\"w-5 h-5 text-gray-500\" />\n          </button>\n        </div>\n\n        {/* Form */}\n        <form onSubmit={handleSubmit} className=\"p-6 space-y-6\">\n          {/* Care Circle Selection */}\n          <div>\n            <label className=\"block text-sm font-medium text-gray-700 mb-2\">\n              Who are you visiting?\n            </label>\n            <select\n              value={selectedCircle}\n              onChange={(e) => handleCircleChange(e.target.value)}\n              className=\"w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\"\n              required\n            >\n              <option value=\"\">Select patient</option>\n              {careCircles.map((circle) => (\n                <option key={circle.id} value={circle.id}>\n                  {circle.patient_first_name} {circle.patient_last_name}\n                </option>\n              ))}\n            </select>\n          </div>\n\n          {/* Visitor Selection */}\n          <div>\n            <label className=\"block text-sm font-medium text-gray-700 mb-2\">\n              Who's visiting?\n            </label>\n            <select\n              value={visitorId}\n              onChange={(e) => setVisitorId(e.target.value)}\n              className=\"w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\"\n              required\n            >\n              <option value=\"\">Select visitor</option>\n              {familyMembers.map((member) => (\n                <option key={member.id} value={member.id}>\n                  {member.full_name}\n                </option>\n              ))}\n            </select>\n          </div>\n\n          {/* Date */}\n          <div>\n            <label className=\"block text-sm font-medium text-gray-700 mb-2\">\n              <Calendar className=\"w-4 h-4 inline mr-2\" />\n              Date\n            </label>\n            <input\n              type=\"date\"\n              value={visitDate}\n              onChange={(e) => setVisitDate(e.target.value)}\n              className=\"w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\"\n              required\n            />\n          </div>\n\n          {/* Time */}\n          <div className=\"grid grid-cols-2 gap-4\">\n            <div>\n              <label className=\"block text-sm font-medium text-gray-700 mb-2\">\n                <Clock className=\"w-4 h-4 inline mr-2\" />\n                Start Time\n              </label>\n              <select\n                value={startTime}\n                onChange={(e) => setStartTime(e.target.value)}\n                className=\"w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\"\n                required\n              >\n                {generateTimeSlots().map((time) => (\n                  <option key={time} value={time}>\n                    {time}\n                  </option>\n                ))}\n              </select>\n            </div>\n            <div>\n              <label className=\"block text-sm font-medium text-gray-700 mb-2\">\n                End Time\n              </label>\n              <select\n                value={endTime}\n                onChange={(e) => setEndTime(e.target.value)}\n                className=\"w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent\"\n                required\n              >\n                {generateTimeSlots().map((time) => (\n                  <option key={time} value={time}>\n                    {time}\n                  </option>\n                ))}\n              </select>\n            </div>\n          </div>\n\n          {/* Notes */}\n          <div>\n            <label className=\"block text-sm font-medium text-gray-700 mb-2\">\n              <MessageSquare className=\"w-4 h-4 inline mr-2\" />\n              Notes (optional)\n            </label>\n            <textarea\n              value={notes}\n              onChange={(e) => setNotes(e.target.value)}\n              placeholder=\"Any special notes for this visit...\"\n              className=\"w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none\"\n              rows={3}\n            />\n          </div>\n\n          {/* Buttons */}\n          <div className=\"flex space-x-3 pt-4\">\n            <button\n              type=\"button\"\n              onClick={handleDelete}\n              disabled={deleteLoading}\n              className=\"flex items-center justify-center px-4 py-3 border border-red-300 rounded-xl text-red-700 font-medium hover:bg-red-50 transition-colors disabled:opacity-50\"\n            >\n              <Trash2 className=\"w-4 h-4 mr-2\" />\n              {deleteLoading ? 'Deleting...' : 'Delete'}\n            </button>\n            <button\n              type=\"button\"\n              onClick={onClose}\n              className=\"flex-1 py-3 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors\"\n            >\n              Cancel\n            </button>\n            <button\n              type=\"submit\"\n              disabled={loading}\n              className=\"flex-1 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50\"\n            >\n              {loading ? 'Saving...' : 'Save Changes'}\n            </button>\n          </div>\n        </form>\n      </div>\n    </div>\n  )\n}"
