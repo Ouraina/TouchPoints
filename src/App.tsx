@@ -7,7 +7,7 @@ import { CreateCircleScreen } from './components/onboarding/CreateCircleScreen'
 import { ScheduleFirstVisitScreen } from './components/onboarding/ScheduleFirstVisitScreen'
 import { InviteFamilyScreen } from './components/onboarding/InviteFamilyScreen'
 import { Dashboard } from './components/Dashboard'
-import { PremiumDashboard } from './components/PremiumDashboard'
+import { SimpleDashboard } from './components/SimpleDashboard'
 import { CalendarScreen } from './components/calendar/CalendarScreen'
 import { InviteJoinScreen } from './components/InviteJoinScreen'
 import { UpdateNotification } from './components/pwa/UpdateNotification'
@@ -257,7 +257,7 @@ function App() {
           {/* Protected routes */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <PremiumDashboard />
+              <SimpleDashboard />
             </ProtectedRoute>
           } />
           

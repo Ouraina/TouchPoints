@@ -54,9 +54,8 @@ export const SignUpScreen: React.FC = () => {
       }}>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <Logo size="lg" className="mx-auto mb-4" />
-            <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>TouchPoints</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>Coordinating family visits with care</p>
+            <h1 className="text-3xl font-bold text-gray-900">TouchPoints</h1>
+            <p className="text-gray-500">Coordinating family visits with care</p>
           </div>
 
           <Card>
@@ -112,7 +111,6 @@ export const SignUpScreen: React.FC = () => {
     }}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Logo size="lg" className="mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-white mb-2">TouchPoints</h1>
           <p className="text-white/80">Coordinating family visits with care</p>
         </div>
