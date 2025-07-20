@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, Clock, MessageSquare, X, Trash2, User } from 'lucide-react'
+import { X, User, Calendar, Clock, FileText, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 interface EditVisitModalProps {
@@ -37,19 +37,17 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
   visitId,
   onSuccess
 }) => {
-  const [loading, setLoading] = useState(false)
-  const [deleteLoading, setDeleteLoading] = useState(false)
   const [visit, setVisit] = useState<Visit | null>(null)
   const [careCircles, setCareCircles] = useState<CareCircle[]>([])
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([])
-  
-  // Form fields
   const [selectedCircle, setSelectedCircle] = useState('')
   const [visitDate, setVisitDate] = useState('')
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [visitorId, setVisitorId] = useState('')
   const [notes, setNotes] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
     if (isOpen && visitId) {
@@ -82,7 +80,6 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
 
   const loadData = async () => {
     try {
-      // Load care circles
       const { data: circleData, error: circleError } = await supabase
         .from('care_circles')
         .select('id, patient_first_name, patient_last_name')
@@ -90,7 +87,6 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
       if (circleError) throw circleError
       setCareCircles(circleData || [])
 
-      // Load family members for the current circle
       if (visit?.circle_id) {
         await loadFamilyMembers(visit.circle_id)
       }
@@ -115,7 +111,7 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
 
       if (error) throw error
 
-      const members = data.map(item => item.users)
+      const members = data.map(item => item.users).flat() as FamilyMember[]
       setFamilyMembers(members)
     } catch (error) {
       console.error('Error loading family members:', error)
@@ -197,7 +193,6 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Edit Visit</h2>
           <button
@@ -208,9 +203,7 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Care Circle Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Who are you visiting?
@@ -230,7 +223,6 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
             </select>
           </div>
 
-          {/* Visitor Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <User className="w-4 h-4 inline mr-2" />
@@ -251,11 +243,10 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
             </select>
           </div>
 
-          {/* Date */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Calendar className="w-4 h-4 inline mr-2" />
-              Date
+              Visit Date
             </label>
             <input
               type="date"
@@ -266,7 +257,6 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
             />
           </div>
 
-          {/* Time */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -279,6 +269,7 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
                 className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
+                <option value="">Select time</option>
                 {generateTimeSlots().map((time) => (
                   <option key={time} value={time}>
                     {time}
@@ -286,8 +277,10 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Clock className="w-4 h-4 inline mr-2" />
                 End Time
               </label>
               <select
@@ -296,6 +289,7 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
                 className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
+                <option value="">Select time</option>
                 {generateTimeSlots().map((time) => (
                   <option key={time} value={time}>
                     {time}
@@ -305,45 +299,35 @@ export const EditVisitModal: React.FC<EditVisitModalProps> = ({
             </div>
           </div>
 
-          {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <MessageSquare className="w-4 h-4 inline mr-2" />
-              Notes (optional)
+              <FileText className="w-4 h-4 inline mr-2" />
+              Notes (Optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any special notes for this visit..."
-              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               rows={3}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Add any notes about this visit..."
             />
           </div>
 
-          {/* Buttons */}
-          <div className="flex space-x-3 pt-4">
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? 'Updating...' : 'Update Visit'}
+            </button>
             <button
               type="button"
               onClick={handleDelete}
               disabled={deleteLoading}
-              className="flex items-center justify-center px-4 py-3 border border-red-300 rounded-xl text-red-700 font-medium hover:bg-red-50 transition-colors disabled:opacity-50"
+              className="bg-red-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {deleteLoading ? 'Deleting...' : 'Delete'}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 px-4 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Save Changes'}
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         </form>
