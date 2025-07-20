@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { addWeeks, subWeeks, addMonths, subMonths, format } from 'date-fns'
 import { supabase } from '../../lib/supabase'
 import type { CareCircle, Visit, CircleMember } from '../../types'
 import { useAuth } from '../../hooks/useAuth'
 import { useVisitPatterns } from '../../hooks/useVisitPatterns'
 import { WeekView } from './WeekView'
+import { MonthView } from './MonthView'
 import { VisitModal } from './VisitModal'
 import { VisitDetailsModal } from '../visit/VisitDetailsModal'
 import { VisitSuggestions } from '../suggestions/VisitSuggestions'
+import { SmartSuggestionsPanel } from '../smart/SmartSuggestionsPanel'
+import { SmartNotificationCenter, NotificationBadge } from '../notifications/SmartNotificationCenter'
+import { EmergencySystem } from '../emergency/EmergencySystem'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
-import { Plus, Settings, MessageSquare, Brain, RefreshCw } from 'lucide-react'
+import { Plus, Settings, MessageSquare, Brain, RefreshCw, ChevronLeft, ChevronRight, Calendar, CalendarDays } from 'lucide-react'
 
 export const CalendarScreen: React.FC = () => {
   const { circleId } = useParams()
-  const { } = useAuth()
+  const { user } = useAuth()
   const [circle, setCircle] = useState<CareCircle | null>(null)
   const [visits, setVisits] = useState<Visit[]>([])
   const [members, setMembers] = useState<CircleMember[]>([])
@@ -24,6 +29,9 @@ export const CalendarScreen: React.FC = () => {
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null)
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [selectedTime, setSelectedTime] = useState<string>('')
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [viewMode, setViewMode] = useState<'week' | 'month'>('week')
+  const [showNotifications, setShowNotifications] = useState(false)
   
   // Visit patterns integration
   const {
@@ -109,6 +117,24 @@ export const CalendarScreen: React.FC = () => {
     setSelectedDate(date)
     setSelectedTime(time)
     setShowVisitModal(true)
+  }
+
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(format(date, 'yyyy-MM-dd'))
+    setSelectedTime('09:00')
+    setShowVisitModal(true)
+  }
+
+  const navigateDate = (direction: 'prev' | 'next') => {
+    if (viewMode === 'week') {
+      setCurrentDate(direction === 'next' ? addWeeks(currentDate, 1) : subWeeks(currentDate, 1))
+    } else {
+      setCurrentDate(direction === 'next' ? addMonths(currentDate, 1) : subMonths(currentDate, 1))
+    }
+  }
+
+  const goToToday = () => {
+    setCurrentDate(new Date())
   }
 
   const handleVisitClick = (visit: Visit) => {
@@ -197,6 +223,10 @@ export const CalendarScreen: React.FC = () => {
               </p>
             </div>
             <div className="flex space-x-2">
+              <NotificationBadge
+                count={3}
+                onClick={() => setShowNotifications(true)}
+              />
               <Button
                 size="sm"
                 variant="secondary"
@@ -262,6 +292,20 @@ export const CalendarScreen: React.FC = () => {
         </div>
 
         {/* Smart Suggestions */}
+        <div className="mb-6">
+          <SmartSuggestionsPanel
+            visits={visits}
+            members={members}
+            circle={circle}
+            onScheduleVisit={(date, time, visitorId) => {
+              setSelectedDate(date)
+              setSelectedTime(time)
+              setShowVisitModal(true)
+            }}
+          />
+        </div>
+
+        {/* Legacy Pattern Suggestions */}
         {suggestions.length > 0 && (
           <div className="mb-6">
             <VisitSuggestions
@@ -289,7 +333,42 @@ export const CalendarScreen: React.FC = () => {
         {/* Calendar */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-text">Visit Schedule</h2>
+            <div className="flex items-center space-x-4">
+              <h2 className="text-lg font-semibold text-text">Visit Schedule</h2>
+              
+              {/* View Toggle */}
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('week')}
+                  className={`
+                    flex items-center px-3 py-1 rounded-md text-sm font-medium transition-colors
+                    ${
+                      viewMode === 'week' 
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }
+                  `}
+                >
+                  <CalendarDays className="w-4 h-4 mr-1" />
+                  Week
+                </button>
+                <button
+                  onClick={() => setViewMode('month')}
+                  className={`
+                    flex items-center px-3 py-1 rounded-md text-sm font-medium transition-colors
+                    ${
+                      viewMode === 'month' 
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }
+                  `}
+                >
+                  <Calendar className="w-4 h-4 mr-1" />
+                  Month
+                </button>
+              </div>
+            </div>
+            
             <Button
               onClick={() => setShowVisitModal(true)}
               className="flex items-center"
@@ -299,15 +378,66 @@ export const CalendarScreen: React.FC = () => {
             </Button>
           </div>
 
-          <WeekView
-            visits={visits}
-            onTimeSlotClick={handleTimeSlotClick}
-            onVisitClick={handleVisitClick}
-            visitingHours={{
-              start: circle.visiting_hours_start || '09:00',
-              end: circle.visiting_hours_end || '21:00'
-            }}
-          />
+          {/* Navigation Controls */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigateDate('prev')}
+                className="flex items-center"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              
+              <div className="text-lg font-semibold text-gray-800 min-w-[180px] text-center">
+                {viewMode === 'week' 
+                  ? format(currentDate, 'MMM d, yyyy')
+                  : format(currentDate, 'MMMM yyyy')
+                }
+              </div>
+              
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigateDate('next')}
+                className="flex items-center"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={goToToday}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              Today
+            </Button>
+          </div>
+
+          {/* Calendar Views */}
+          {viewMode === 'week' ? (
+            <WeekView
+              visits={visits}
+              members={members}
+              onTimeSlotClick={handleTimeSlotClick}
+              onVisitClick={handleVisitClick}
+              visitingHours={{
+                start: circle.visiting_hours_start || '09:00',
+                end: circle.visiting_hours_end || '21:00'
+              }}
+            />
+          ) : (
+            <MonthView
+              visits={visits}
+              members={members}
+              currentDate={currentDate}
+              onDateClick={handleDateClick}
+              onVisitClick={handleVisitClick}
+            />
+          )}
         </Card>
 
         {/* Family Members */}
@@ -351,6 +481,30 @@ export const CalendarScreen: React.FC = () => {
         circle={circle}
         onVisitUpdated={handleVisitUpdated}
         onVisitDeleted={handleVisitDeleted}
+      />
+
+      {/* Smart Notification Center */}
+      <SmartNotificationCenter
+        visits={visits}
+        members={members}
+        circle={circle}
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        onNotificationAction={(notification) => {
+          // Handle notification actions
+          if (notification.actionData?.date) {
+            setSelectedDate(notification.actionData.date)
+            setSelectedTime('09:00')
+            setShowVisitModal(true)
+          }
+          setShowNotifications(false)
+        }}
+      />
+
+      {/* Emergency System */}
+      <EmergencySystem
+        circle={circle}
+        members={members}
       />
     </div>
   )

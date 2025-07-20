@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^7.5.0",
     "@supabase/supabase-js": "^2.52.0",
     "@tailwindcss/forms": "^0.5.10",
     "@types/gapi.auth2": "^0.0.61",
@@ -22,7 +23,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.0",
-    "stream-browserify": "^3.0.0"
+    "stream-browserify": "^3.0.0",
+    "stripe": "^18.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

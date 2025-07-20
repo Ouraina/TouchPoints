@@ -1,17 +1,6 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './hooks/useAuth'
-import { LoginScreen } from './components/auth/LoginScreen'
-import { SignUpScreen } from './components/auth/SignUpScreen'
-import { CreateCircleScreen } from './components/onboarding/CreateCircleScreen'
-import { ScheduleFirstVisitScreen } from './components/onboarding/ScheduleFirstVisitScreen'
-import { InviteFamilyScreen } from './components/onboarding/InviteFamilyScreen'
-import { Dashboard } from './components/Dashboard'
-import { SimpleDashboard } from './components/SimpleDashboard'
-import { CalendarScreen } from './components/calendar/CalendarScreen'
-import { InviteJoinScreen } from './components/InviteJoinScreen'
+import { AppRouter } from './components/AppRouter'
 import { UpdateNotification } from './components/pwa/UpdateNotification'
-import { supabase } from './lib/supabase'
 import './utils/serviceWorker' // Auto-register service worker
 
 // Email confirmation callback component
@@ -230,69 +219,12 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={
-            <PublicRoute>
-              <LoginScreen />
-            </PublicRoute>
-          } />
-          <Route path="/signup" element={
-            <PublicRoute>
-              <SignUpScreen />
-            </PublicRoute>
-          } />
-          
-          {/* Email confirmation callback */}
-          <Route path="/auth/callback" element={<EmailConfirmationCallback />} />
-          
-          {/* Test route for bypassing auth */}
-          <Route path="/test" element={<TestAuthBypass />} />
-          
-          {/* Invite route (accessible to non-users) */}
-          <Route path="/invite/:circleId" element={<InviteJoinScreen />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <SimpleDashboard />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/onboarding/create-circle" element={
-            <ProtectedRoute>
-              <CreateCircleScreen />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/circle/:circleId/schedule-first-visit" element={
-            <ProtectedRoute>
-              <ScheduleFirstVisitScreen />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/circle/:circleId/invite-family" element={
-            <ProtectedRoute>
-              <InviteFamilyScreen />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/circle/:circleId" element={
-            <ProtectedRoute>
-              <CalendarScreen />
-            </ProtectedRoute>
-          } />
-          
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-        </Routes>
-        
-        {/* Global PWA components */}
-        <UpdateNotification />
-      </div>
-    </Router>
+    <div className="App">
+      <AppRouter />
+      
+      {/* PWA Components */}
+      <UpdateNotification />
+    </div>
   )
 }
 
