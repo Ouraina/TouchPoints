@@ -7,9 +7,17 @@
       "config": {
         "distDir": "dist"
       }
+    },
+    {
+      "src": "src/pages/api/**/*.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/src/pages/api/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
@@ -19,7 +27,7 @@
     "NODE_ENV": "production"
   },
   "functions": {
-    "app/api/**": {
+    "src/pages/api/**/*.ts": {
       "runtime": "nodejs18.x"
     }
   },
